@@ -1,0 +1,15 @@
+[
+  { "word": "tiger", "meaning": "con hổ", "image": "images/tiger.jpg" },
+  { "word": "elephant", "meaning": "con voi", "image": "images/elephant.jpg" },
+  { "word": "kitten", "meaning": "mèo con", "image": "images/kitten.jpg" },
+  { "word": "puppy", "meaning": "chó con", "image": "images/puppy.jpg" },
+  { "word": "parrot", "meaning": "con vẹt", "image": "images/parrot.jpg" },
+  { "word": "rabbit", "meaning": "con thỏ", "image": "images/rabbit.jpg" },
+  { "word": "bird", "meaning": "con chim", "image": "images/bird.jpg" },
+  { "word": "eagle", "meaning": "đại bàng", "image": "images/eagle.jpg" },
+  { "word": "lion", "meaning": "sư tử", "image": "images/lion.jpg" },
+  { "word": "bear", "meaning": "gấu", "image": "images/bear.jpg" },
+  { "word": "ant", "meaning": "kiến", "image": "images/ant.jpg" },
+  { "word": "spider", "meaning": "nhện", "image": "images/spider.jpg" },
+  { "word": "mouse", "meaning": "chuột", "image": "images/mouse.jpg" }
+]
