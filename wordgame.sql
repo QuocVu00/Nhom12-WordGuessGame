@@ -8,7 +8,7 @@ CREATE DATABASE IF NOT EXISTS `wordgame`
 USE `wordgame`;
 
 -- =========================================================
--- BẢNG USERS
+-- BẢNG Người dùng 
 -- =========================================================
 -- Cấu trúc:
 --   id              : khoá chính
