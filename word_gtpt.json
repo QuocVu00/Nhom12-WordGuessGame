@@ -1,0 +1,20 @@
+[
+  { "word": "bicycle", "meaning": "xe đạp", "image": "images/bicycle.jpg" },
+  { "word": "motorcycle", "meaning": "xe máy", "image": "images/motorcycle.jpg" },
+  { "word": "car", "meaning": "xe hơi", "image": "images/car.jpg" },
+  { "word": "bus", "meaning": "xe buýt", "image": "images/bus.jpg" },
+  { "word": "truck", "meaning": "xe tải", "image": "images/truck.jpg" },
+  { "word": "taxi", "meaning": "xe taxi", "image": "images/taxi.jpg" },
+  { "word": "train", "meaning": "tàu hỏa", "image": "images/train.jpg" },
+  { "word": "airplane", "meaning": "máy bay", "image": "images/airplane.jpg" },
+  { "word": "helicopter", "meaning": "trực thăng", "image": "images/helicopter.jpg" },
+  { "word": "boat", "meaning": "thuyền", "image": "images/boat.jpg" },
+  { "word": "ship", "meaning": "tàu thủy", "image": "images/ship.jpg" },
+  { "word": "ambulance", "meaning": "xe cứu thương", "image": "images/ambulance.jpg" },
+  { "word": "fire truck", "meaning": "xe cứu hỏa", "image": "images/fire_truck.jpg" },
+  { "word": "police car", "meaning": "xe cảnh sát", "image": "images/police_car.jpg" },
+  { "word": "subway", "meaning": "tàu điện ngầm", "image": "images/subway.jpg" },
+  { "word": "van", "meaning": "xe van (xe tải nhỏ)", "image": "images/van.jpg" },
+  { "word": "scooter", "meaning": "xe tay ga", "image": "images/scooter.jpg" },
+  { "word": "traffic light", "meaning": "đèn giao thông", "image": "images/traffic_light.jpg" }
+]
