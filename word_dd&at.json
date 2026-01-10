@@ -23,4 +23,5 @@
   { "word": "Sticky Rice", "meaning": "Xôi", "image": ["images/sticky_rice_1.jpg", "images/sticky_rice_2.jpg"] },
   { "word": "Fish Sauce", "meaning": "Nước mắm", "image": ["images/fish_sauce_1.jpg", "images/fish_sauce_2.jpg"] },
   { "word": "Iced Milk Coffee", "meaning": "Cà phê sữa đá", "image": ["images/iced_milk_coffee_1.jpg", "images/iced_milk_coffee_2.jpg"] }
+  "_comment": "Update word_dd&at.json"
 ]
