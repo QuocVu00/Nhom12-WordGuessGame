@@ -1,0 +1,26 @@
+[
+  { "word": "doctor", "meaning": "bác sĩ", "image": "images/doctor.jpg" },
+  { "word": "teacher", "meaning": "giáo viên", "image": "images/teacher.jpg" },
+
+  { "word": "nurse", "meaning": "y tá", "image": "images/nurse.jpg" },
+  { "word": "engineer", "meaning": "kỹ sư", "image": "images/engineer.jpg" },
+  {
+    "word": "police",
+    "meaning": "cảnh sát",
+    "image": "images/police_officer.jpg"
+  },
+  {
+    "word": "firefighter",
+    "meaning": "lính cứu hỏa",
+    "image": "images/firefighter.jpg"
+  },
+  { "word": "chef", "meaning": "đầu bếp", "image": "images/chef.jpg" },
+  { "word": "farmer", "meaning": "nông dân", "image": "images/farmer.jpg" },
+  { "word": "driver", "meaning": "tài xế", "image": "images/driver.jpg" },
+  { "word": "pilot", "meaning": "phi công", "image": "images/pilot.jpg" },
+  {
+    "word": "programmer",
+    "meaning": "lập trình viên",
+    "image": "images/programmer.jpg"
+  }
+]
