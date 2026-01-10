@@ -1,0 +1,62 @@
+[
+  {
+    "word": "football",
+    "meaning": "bóng đá",
+    "image": ["images/football_1.jpg", "images/football_2.jpg"]
+  },
+  {
+    "word": "basketball",
+    "meaning": "bóng rổ",
+    "image": "images/basketball_1.jpg"
+  },
+  {
+    "word": "swimming",
+    "meaning": "bơi lội",
+    "image": "images/swimming_1.jpg"
+  },
+  {
+    "word": "running",
+    "meaning": "chạy bộ",
+    "image": "images/running_1.jpg"
+  },
+  {
+    "word": "cycling",
+    "meaning": "đạp xe",
+    "image": "images/cycling_1.jpg"
+  },
+  {
+    "word": "gym",
+    "meaning": "phòng gym / tập gym",
+    "image": "images/gym_1.jpg"
+  },
+  {
+    "word": "movie",
+    "meaning": "phim",
+    "image": "images/movie_1.jpg"
+  },
+  {
+    "word": "music",
+    "meaning": "âm nhạc",
+    "image": "images/music_1.jpg"
+  },
+  {
+    "word": "concert",
+    "meaning": "buổi hòa nhạc",
+    "image": "images/concert_1.jpg"
+  },
+  {
+    "word": "game",
+    "meaning": "trò chơi",
+    "image": "images/game_1.jpg"
+  },
+  {
+    "word": "chess",
+    "meaning": "cờ vua",
+    "image": "images/chess_1.jpg"
+  },
+  {
+    "word": "badminton",
+    "meaning": "cầu lông",
+    "image": "images/badminton_1.jpg"
+  }
+]
