@@ -178,3 +178,79 @@ function toPublicRoom(room) {
 /**************************************************
  * END Tran nhu dat
  **************************************************/
+/**************************************************
+* BEGIN MEMBER tung - MULTIPLAYER ROOMS 
+ * Phạm vi: cấu trúc rooms + logic phòng chơi nhiều người
+ **************************************************/
+
+// ---------- GAME ĐA NGƯỜI (ROOM) ----------
+function createRoom(owner) {
+  const roomId = uuidv4().slice(0, 8);
+  const room = {
+    id: roomId,
+    ownerId: owner.userId,
+    ownerName: owner.username,
+    players: [
+      {
+        userId: owner.userId,
+        username: owner.username,
+        socketId: owner.socketId,
+        score: 0,
+      },
+    ],
+    state: "waiting", // waiting | playing | ended
+    mode: "normal", // normal | reverse
+    wordPack: "general", // general | animals | jobs
+    round: 0,
+    maxRounds: MAX_ROUNDS,
+    currentWord: null,
+    timeLeft: ROUND_TIME,
+    timer: null,
+    createdAt: nowISO(),
+  };
+  rooms.push(room);
+  return room;
+}
+
+function removeRoom(roomId) {
+  rooms = rooms.filter((r) => r.id !== roomId);
+}
+
+function addPlayerToRoom(room, player) {
+  const exists = room.players.find((p) => p.userId === player.userId);
+  if (exists) return false;
+
+  room.players.push({
+    userId: player.userId,
+    username: player.username,
+    socketId: player.socketId,
+    score: 0,
+  });
+  return true;
+}
+
+function removePlayerFromRoom(room, socketId) {
+  room.players = room.players.filter((p) => p.socketId !== socketId);
+}
+
+function getPlayerInRoom(room, socketId) {
+  return room.players.find((p) => p.socketId === socketId);
+}
+
+function setRoomOwnerIfNeeded(room) {
+  if (room.players.length === 0) return;
+  // nếu owner rời -> set owner mới là player đầu tiên
+  const ownerStillHere = room.players.some((p) => p.userId === room.ownerId);
+  if (!ownerStillHere) {
+    room.ownerId = room.players[0].userId;
+    room.ownerName = room.players[0].username;
+  }
+}
+
+function broadcastRoomUpdate(room) {
+  io.to(room.id).emit("roomUpdate", toPublicRoom(room));
+}
+
+/**************************************************
+ * END MEMBER tung
+ **************************************************/
