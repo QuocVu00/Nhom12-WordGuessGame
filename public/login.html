@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đăng nhập | Word Guess Game</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div id="authScreen" class="screen active" style="display: flex">
+        <h1 style="margin-bottom: 0">WORD GUESS GAME</h1>
+        <br />
+        <p class="slogan">Hãy đăng nhập để bắt đầu chơi cùng bạn bè!</p>
+
+        <div id="login" class="auth-form active">
+          <input id="loginUsername" placeholder="Tên đăng nhập" class="input" />
+          <input
+            id="loginPassword"
+            type="password"
+            placeholder="Mật khẩu"
+            class="input"
+          />
+          <button id="loginBtn">Đăng nhập</button>
+          <p id="authMessage" class="error-message"></p>
+        </div>
+
+        <p class="auth-switch-link" style="margin-top: 20px">
+          Chưa có tài khoản? <a href="/register.html">Đăng ký ngay</a>
+        </p>
+      </div>
+    </div>
+    <script src="/login_bundle.js"></script>
+  </body>
+</html>

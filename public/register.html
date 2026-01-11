@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đăng ký | Word Guess Game</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div id="registerScreen" class="screen active" style="display: flex">
+        <h1 style="margin-bottom: 0">ĐĂNG KÝ TÀI KHOẢN</h1>
+        <br />
+        <p class="slogan">
+          Đăng ký để cùng tham gia vào cộng đồng đoán từ ngay bây giờ !
+        </p>
+
+        <div class="auth-form">
+          <input
+            id="registerUsername"
+            placeholder="Tên đăng nhập"
+            class="input"
+          />
+          <input
+            id="registerPassword"
+            type="password"
+            placeholder="Mật khẩu"
+            class="input"
+          />
+          <input
+            id="registerConfirmPassword"
+            type="password"
+            placeholder="Xác nhận mật khẩu"
+            class="input"
+          />
+          <input
+            id="registerDisplayName"
+            placeholder="Tên hiển thị (sẽ dùng trong game)"
+            class="input"
+          />
+          <button id="registerBtn">Đăng ký</button>
+          <p id="regMessage" class="error-message"></p>
+        </div>
+
+        <p class="auth-switch-link">
+          Đã có tài khoản? <a href="/login.html">Quay lại Đăng nhập</a>
+        </p>
+      </div>
+    </div>
+    <script src="/login_bundle.js"></script>
+  </body>
+</html>

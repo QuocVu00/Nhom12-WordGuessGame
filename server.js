@@ -254,3 +254,107 @@ function broadcastRoomUpdate(room) {
 /**************************************************
  * END MEMBER tung
  **************************************************/
+/**************************************************
+ * BEGIN MEMBER 3 - AUTH API (LOGIN/REGISTER)
+ * Phạm vi: /api/login, /api/register, validate user, bcrypt...
+ **************************************************/
+
+// ---------- API AUTH ----------
+app.post("/api/register", async (req, res) => {
+  try {
+    const username = safeStr(req.body.username);
+    const password = safeStr(req.body.password);
+
+    if (!username || !password) {
+      return res.status(400).json({ ok: false, message: "Thiếu username/password." });
+    }
+
+    // check exists
+    db.query("SELECT id FROM users WHERE username = ?", [username], async (err, rows) => {
+      if (err) {
+        console.error("❌ DB error register:", err);
+        return res.status(500).json({ ok: false, message: "Lỗi database." });
+      }
+      if (rows.length > 0) {
+        return res.status(409).json({ ok: false, message: "Username đã tồn tại." });
+      }
+
+      const hashed = await bcrypt.hash(password, 10);
+
+      db.query(
+        "INSERT INTO users (username, password, total_score, personal_score, created_at) VALUES (?, ?, 0, 0, ?)",
+        [username, hashed, nowISO()],
+        (err2, result) => {
+          if (err2) {
+            console.error("❌ DB error insert user:", err2);
+            return res.status(500).json({ ok: false, message: "Lỗi tạo user." });
+          }
+
+          return res.json({
+            ok: true,
+            message: "Đăng ký thành công.",
+            user: { id: result.insertId, username },
+          });
+        }
+      );
+    });
+  } catch (e) {
+    console.error("❌ register error:", e);
+    return res.status(500).json({ ok: false, message: "Lỗi server." });
+  }
+});
+
+app.post("/api/login", (req, res) => {
+  try {
+    const username = safeStr(req.body.username);
+    const password = safeStr(req.body.password);
+
+    if (!username || !password) {
+      return res.status(400).json({ ok: false, message: "Thiếu username/password." });
+    }
+
+    db.query("SELECT * FROM users WHERE username = ?", [username], async (err, rows) => {
+      if (err) {
+        console.error("❌ DB error login:", err);
+        return res.status(500).json({ ok: false, message: "Lỗi database." });
+      }
+      if (rows.length === 0) {
+        return res.status(401).json({ ok: false, message: "Sai tài khoản hoặc mật khẩu." });
+      }
+
+      const user = rows[0];
+      const match = await bcrypt.compare(password, user.password);
+      if (!match) {
+        return res.status(401).json({ ok: false, message: "Sai tài khoản hoặc mật khẩu." });
+      }
+
+      return res.json({
+        ok: true,
+        message: "Đăng nhập thành công.",
+        user: {
+          id: user.id,
+          username: user.username,
+          total_score: user.total_score || 0,
+          personal_score: user.personal_score || 0,
+        },
+      });
+    });
+  } catch (e) {
+    console.error("❌ login error:", e);
+    return res.status(500).json({ ok: false, message: "Lỗi server." });
+  }
+});
+
+/**************************************************
+ * END MEMBER 3
+ **************************************************/
+
+/**************************************************
+ * COMMON - ROUTE GIAO DIỆN 
+ * Chỉ chỉnh khi cần mapping trang, static...
+ **************************************************/
+
+// ---------- ROUTE GIAO DIỆN ----------
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "login.html"));
+});
