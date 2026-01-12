@@ -360,7 +360,7 @@ app.get("/", (req, res) => {
 });
 
 /**************************************************
- * BEGIN MEMBER 1 - SOCKET.IO EVENTS
+ * BEGIN MEMBER Tung - SOCKET.IO EVENTS
  * Phạm vi: socket.on(...) của multiplayer + emit room state
  **************************************************/
 
@@ -706,10 +706,10 @@ io.on("connection", (socket) => {
   });
 
 /**************************************************
- * END MEMBER 1 *
+ * END MEMBER Tung *
  **************************************************/
 /**************************************************
- * BEGIN MEMBER 5 - LEADERBOARD / RANKING
+ * BEGIN MEMBER Van - LEADERBOARD / RANKING
  * Phạm vi: API/logic bảng xếp hạng, lấy điểm, emit scoreboard...
  **************************************************/
 
@@ -728,5 +728,156 @@ io.on("connection", (socket) => {
   });
 
 /**************************************************
- * END MEMBER 5
+ * END MEMBER Van
+ **************************************************/
+/**************************************************
+ * BEGIN MEMBER Vu - SINGLE PLAYER GAMEPLAY
+ * Phạm vi: socket event chơi đơn + startSinglePlayerRound + tính điểm, timer...
+ **************************************************/
+
+  // ---------- SINGLE PLAYER ----------
+  socket.on("startSinglePlayer", (payload = {}) => {
+    let { gameMode, wordPack } = payload;
+
+    if (!wordPack || !wordPacks[wordPack]) {
+      wordPack = Object.keys(wordPacks)[0] || "general";
+    }
+    if (gameMode !== "normal" && gameMode !== "reverse") {
+      gameMode = "normal";
+    }
+
+    // chuẩn bị state
+    socket.data.single = {
+      mode: gameMode,
+      wordPack,
+      round: 0,
+      maxRounds: MAX_ROUNDS,
+      score: 0,
+      timeLeft: ROUND_TIME,
+      timer: null,
+      currentWord: null,
+    };
+
+    startSinglePlayerRound(socket);
+  });
+
+  socket.on("singleSubmit", (payload = {}) => {
+    const answer = safeStr(payload.answer);
+    const single = socket.data.single;
+    if (!single) return;
+
+    const current = single.currentWord;
+    if (!current) return;
+
+    const gained = checkAnswerAndScore(single.mode, current.word, answer);
+
+    if (gained > 0) {
+      single.score += gained;
+
+      socket.emit("singleAnswerResult", {
+        ok: true,
+        gained,
+        correctWord: current.word,
+      });
+
+      // next round
+      clearInterval(single.timer);
+      single.timer = null;
+      startSinglePlayerRound(socket);
+    } else {
+      socket.emit("singleAnswerResult", {
+        ok: false,
+        gained: 0,
+        correctWord: current.word,
+      });
+    }
+  });
+
+  socket.on("endSinglePlayer", () => {
+    const single = socket.data.single;
+    if (!single) return;
+
+    if (single.timer) clearInterval(single.timer);
+    single.timer = null;
+
+    socket.emit("singleEnded", {
+      score: single.score,
+      round: single.round,
+      maxRounds: single.maxRounds,
+    });
+
+    socket.data.single = null;
+  });
+
+  function startSinglePlayerRound(socket) {
+    const single = socket.data.single;
+    if (!single) return;
+
+    single.round += 1;
+
+    if (single.round > single.maxRounds) {
+      // end
+      if (single.timer) clearInterval(single.timer);
+      single.timer = null;
+
+      socket.emit("singleEnded", {
+        score: single.score,
+        round: single.round - 1,
+        maxRounds: single.maxRounds,
+      });
+      socket.data.single = null;
+      return;
+    }
+
+    const w = getRandomWordFromPack(single.wordPack);
+    if (!w) {
+      socket.emit("singleEnded", {
+        score: single.score,
+        reason: "Không có từ trong bộ từ.",
+      });
+      socket.data.single = null;
+      return;
+    }
+
+    single.currentWord = w;
+    single.timeLeft = ROUND_TIME;
+
+    socket.emit("singleRoundStart", {
+      round: single.round,
+      maxRounds: single.maxRounds,
+      word: w.word,
+      meaning: w.meaning,
+      image: w.image,
+      mode: single.mode,
+      time: single.timeLeft,
+      score: single.score,
+      room: { players: [] },
+      currentScore: single.score,
+    });
+
+    socket.emit("timerUpdate", { time: single.timeLeft });
+
+    // timer
+    if (single.timer) clearInterval(single.timer);
+
+    single.timer = setInterval(() => {
+      single.timeLeft -= 1;
+      socket.emit("timerUpdate", { time: single.timeLeft });
+
+      if (single.timeLeft <= 0) {
+        clearInterval(single.timer);
+        single.timer = null;
+
+        socket.emit("singleRoundTimeout", {
+          round: single.round,
+          correctWord: single.currentWord?.word,
+        });
+
+        startSinglePlayerRound(socket);
+      }
+    }, 1000);
+  }
+
+/**************************************************
+ * END MEMBER Vu
  **************************************************/
