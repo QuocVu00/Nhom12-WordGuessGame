@@ -708,3 +708,25 @@ io.on("connection", (socket) => {
 /**************************************************
  * END MEMBER 1 *
  **************************************************/
+/**************************************************
+ * BEGIN MEMBER 5 - LEADERBOARD / RANKING
+ * Phạm vi: API/logic bảng xếp hạng, lấy điểm, emit scoreboard...
+ **************************************************/
+
+  // ---------- BẢNG XẾP HẠNG ----------
+  socket.on("getLeaderboard", () => {
+    db.query(
+      "SELECT username, total_score, personal_score FROM users ORDER BY total_score DESC LIMIT 20",
+      (err, rows) => {
+        if (err) {
+          console.error("Lỗi getLeaderboard:", err);
+          return socket.emit("leaderboardData", { ok: false, data: [] });
+        }
+        socket.emit("leaderboardData", { ok: true, data: rows || [] });
+      }
+    );
+  });
+
+/**************************************************
+ * END MEMBER 5
+ **************************************************/

@@ -209,4 +209,97 @@ button:disabled {
   font-size: 0.9rem;
   min-height: 1.2em;
 }
+/**************************************************
+ * thanh van - RANKING / SCOREBOARD UI
+ * Phạm vi: score-list, ranking-item, top 1-2-3 highlight...
+ **************************************************/
+.score-list {
+  width: 100%;
+  background-color: var(--background-light);
+  border-radius: var(--border-radius);
+}
 
+.ranking-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  margin-bottom: 5px;
+  background-color: var(--card-bg);
+  border-radius: 6px;
+  border-left: 4px solid var(--gray-light);
+  transition: var(--transition);
+}
+
+.ranking-item:hover {
+  background-color: #f0f0f0;
+  border-left-color: var(--secondary);
+}
+
+.rank-icon {
+  font-size: 1.2rem;
+  font-weight: 700;
+  width: 30px;
+  text-align: center;
+  color: var(--gray);
+  margin-right: 15px;
+}
+
+.player-details {
+  flex-grow: 1;
+  text-align: left;
+}
+.player-details .name {
+  font-weight: 600;
+  color: var(--text-dark);
+  font-size: 1rem;
+}
+.player-details .rank-number {
+  font-size: 0.85rem;
+  color: var(--gray);
+}
+
+.score-value-ranking {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--secondary-hover);
+}
+
+#globalRankingList .ranking-item:nth-child(1),
+#finalScores .ranking-item:nth-child(1),
+#gameScoreBoard .ranking-item:nth-child(1) {
+  background-color: #fff8e1;
+  border-left-color: gold;
+  box-shadow: 0 5px 15px rgba(255, 215, 0, 0.2);
+}
+#globalRankingList .ranking-item:nth-child(1) .rank-icon,
+#finalScores .ranking-item:nth-child(1) .rank-icon,
+#gameScoreBoard .ranking-item:nth-child(1) .rank-icon {
+  color: gold;
+  font-size: 1.7rem;
+}
+#globalRankingList .ranking-item:nth-child(2),
+#finalScores .ranking-item:nth-child(2),
+#gameScoreBoard .ranking-item:nth-child(2) {
+  background-color: #f0f8ff;
+  border-left-color: silver;
+}
+#globalRankingList .ranking-item:nth-child(2) .rank-icon,
+#finalScores .ranking-item:nth-child(2) .rank-icon,
+#gameScoreBoard .ranking-item:nth-child(2) .rank-icon {
+  color: silver;
+}
+#globalRankingList .ranking-item:nth-child(3),
+#finalScores .ranking-item:nth-child(3),
+#gameScoreBoard .ranking-item:nth-child(3) {
+  background-color: #fff0e8;
+  border-left-color: #cd7f32;
+}
+#globalRankingList .ranking-item:nth-child(3) .rank-icon,
+#finalScores .ranking-item:nth-child(3) .rank-icon,
+#gameScoreBoard .ranking-item:nth-child(3) .rank-icon {
+  color: #cd7f32;
+}
+/**************************************************
+ * End van
+ **************************************************/
