@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Word Guess Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/socket.io/socket.io.js"></script>
+    <script defer src="/game_bundle.js"></script>
+  </head>
+
+  <body>
+    <div class="container">
+
+      <!-- ================================================= -->
+      <!-- COMMON - HEADER / USER INFO (KHÔNG GIAO RIÊNG) -->
+      <!-- ================================================= -->
+      <h1>WORD GUESS GAME</h1>
+      <p class="slogan">Đoán từ – chơi cùng bạn bè – học mà vui</p>
+
+      <div class="room-host-tag">
+        Xin chào, <span id="displayName"></span> |
+        Tổng điểm: <span id="userTotalScore">0</span>
+      </div>
+
+      <!-- ================================================= -->
+      <!-- BEGIN MEMBER 4 - LOBBY SCREEN -->
+      <!-- Phạm vi: giao diện sảnh, tạo phòng, tìm phòng -->
+      <!-- ================================================= -->
+      <div id="lobbyScreen" class="screen">
+
+        <div class="lobby-buttons">
+          <button id="createRoomBtn">➕ Tạo phòng</button>
+          <button id="singlePlayerBtn">🎮 Chơi một người</button>
+          <button id="showRankingBtn">🏆 Bảng xếp hạng</button>
+        </div>
+
+        <div style="margin-top: 30px; width: 100%; max-width: 300px">
+          <input
+            id="roomSearchInput"
+            class="input"
+            placeholder="Nhập ID phòng để tham gia"
+          />
+          <button id="searchRoomBtn">🔍 Tham gia phòng</button>
+          <div id="lobbyErrorMessage" class="error-message"></div>
+        </div>
+
+        <button id="logoutBtn" class="danger-btn">🚪 Đăng xuất</button>
+      </div>
+      <!-- ================================================= -->
+      <!-- END MEMBER 4 -->
+      <!-- ================================================= -->
+
+      <!-- ================================================= -->
+      <!-- BEGIN MEMBER 4 - ROOM SCREEN -->
+      <!-- Phạm vi: phòng chờ, cài đặt phòng, danh sách người chơi -->
+      <!-- ================================================= -->
+      <div id="roomScreen" class="screen" style="display: none">
+
+        <h2 id="roomNameDisplay"></h2>
+        <div id="roomHostDisplay" class="room-host-tag"></div>
+        <div id="roomPlayersCount"></div>
+
+        <div class="room-content">
+          <div class="room-settings-panel">
+            <h3>Cài đặt phòng</h3>
+
+            <label>Tên phòng</label>
+            <input id="roomNameInput" class="input" />
+
+            <label>Chế độ chơi</label>
+            <select id="roomMode" class="input">
+              <option value="normal">Bình thường</option>
+              <option value="reverse">Đảo ngược</option>
+            </select>
+
+            <label>Bộ từ</label>
+            <select id="roomWordPack" class="input"></select>
+
+            <div id="settingsMessage"></div>
+
+            <button id="startRoomBtn">▶️ Bắt đầu</button>
+            <button id="leaveRoomBtn" class="danger-btn">⬅️ Rời phòng</button>
+          </div>
+
+          <div class="room-players-panel">
+            <h3>Người chơi</h3>
+            <div id="roomPlayersList" class="score-list"></div>
+
+            <div id="inviteSection" style="margin-top: 20px">
+              <input
+                id="inviteUsernameInput"
+                class="input"
+                placeholder="Tên người chơi để mời"
+              />
+              <button id="invitePlayerBtn">📨 Mời</button>
+              <div id="inviteMessage"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- ================================================= -->
+      <!-- END MEMBER 4 -->
+      <!-- ================================================= -->
+
+      <!-- ================================================= -->
+      <!-- BEGIN MEMBER 4 - GAME SCREEN -->
+      <!-- Phạm vi: màn hình chơi game -->
+      <!-- ================================================= -->
+      <div id="gameScreen" class="screen" style="display: none">
+
+        <h2 id="gameRoomName"></h2>
+
+        <div class="game-info">
+          Vòng <span id="currentRound">1</span>/<span id="maxRounds">5</span> |
+          Thời gian: <span id="timer">30</span>
+        </div>
+
+        <img id="hintImage" style="display: none" />
+        <div id="wordDisplay">_ _ _ _</div>
+        <div id="message"></div>
+
+        <input
+          id="guessInput"
+          class="input"
+          placeholder="Nhập từ của bạn và nhấn Enter"
+        />
+
+        <div id="singleCurrentScore"></div>
+
+        <h3>Bảng điểm</h3>
+        <div id="gameScoreBoard" class="score-list"></div>
+
+        <button id="endGameBtn" class="danger-btn">⛔ Kết thúc</button>
+      </div>
+      <!-- ================================================= -->
+      <!-- END MEMBER 4 -->
+      <!-- ================================================= -->
