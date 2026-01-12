@@ -303,3 +303,40 @@ button:disabled {
 /**************************************************
  * End van
  **************************************************/
+
+ .game-info {
+  font-size: 1.1rem;
+  color: var(--gray);
+  margin-bottom: 20px;
+}
+
+#hintImage {
+  max-width: 100%;
+  max-height: 250px;
+  height: auto;
+  border-radius: var(--border-radius);
+  margin-bottom: 15px;
+  object-fit: contain;
+  background-color: var(--card-bg);
+  padding: 10px;
+  border: 1px solid var(--gray-light);
+}
+
+#wordDisplay {
+  font-size: 3rem;
+  font-weight: 700;
+  letter-spacing: 5px;
+  margin: 20px 0;
+  color: var(--text-dark);
+}
+
+#message {
+  color: var(--danger);
+  font-weight: 600;
+  min-height: 30px;
+}
+
+#guessInput {
+  max-width: 400px;
+  text-align: center;
+}
