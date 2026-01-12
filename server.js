@@ -358,3 +358,353 @@ app.post("/api/login", (req, res) => {
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "login.html"));
 });
+
+/**************************************************
+ * BEGIN MEMBER 1 - SOCKET.IO EVENTS
+ * Phạm vi: socket.on(...) của multiplayer + emit room state
+ **************************************************/
+
+// ---------- SOCKET.IO ----------
+io.on("connection", (socket) => {
+  console.log("🔌 User connected:", socket.id);
+
+  // Client gửi user info sau login
+  socket.on("registerOnline", (payload) => {
+    const userId = payload?.userId;
+    const username = payload?.username;
+    if (userId) {
+      onlineUsers[userId] = socket.id;
+      socket.data.userId = userId;
+      socket.data.username = username || "User";
+    }
+  });
+
+  // --- MULTIPLAYER: create room ---
+  socket.on("createRoom", (payload = {}) => {
+    const userId = payload.userId || socket.data.userId;
+    const username = payload.username || socket.data.username;
+
+    if (!userId) {
+      return socket.emit("gameError", "Bạn chưa đăng nhập.");
+    }
+
+    const room = createRoom({
+      userId,
+      username,
+      socketId: socket.id,
+    });
+
+    socket.join(room.id);
+
+    socket.emit("roomCreated", toPublicRoom(room));
+    broadcastRoomUpdate(room);
+  });
+
+  // --- MULTIPLAYER: join room ---
+  socket.on("joinRoom", (payload = {}) => {
+    const roomId = typeof payload === "string" ? payload : payload.roomId;
+    const userId = payload.userId || socket.data.userId;
+    const username = payload.username || socket.data.username;
+
+    if (!roomId) return socket.emit("gameError", "Thiếu roomId.");
+    const room = getRoomById(roomId);
+    if (!room) return socket.emit("gameError", "Phòng không tồn tại.");
+
+    if (room.state !== "waiting") {
+      return socket.emit("gameError", "Phòng đang chơi, không thể tham gia.");
+    }
+
+    if (!userId) return socket.emit("gameError", "Bạn chưa đăng nhập.");
+
+    const ok = addPlayerToRoom(room, {
+      userId,
+      username,
+      socketId: socket.id,
+    });
+
+    if (!ok) {
+      // nếu đã có trong room -> vẫn join lại socket room
+      socket.join(room.id);
+      broadcastRoomUpdate(room);
+      return socket.emit("roomJoined", toPublicRoom(room));
+    }
+
+    socket.join(room.id);
+    socket.emit("roomJoined", toPublicRoom(room));
+    broadcastRoomUpdate(room);
+  });
+
+  socket.on("leaveRoom", (payload = {}) => {
+    const roomId = typeof payload === "string" ? payload : payload.roomId;
+    if (!roomId) return;
+
+    const room = getRoomById(roomId);
+    if (!room) return;
+
+    socket.leave(room.id);
+    removePlayerFromRoom(room, socket.id);
+    setRoomOwnerIfNeeded(room);
+
+    if (room.players.length === 0) {
+      removeRoom(room.id);
+      return;
+    }
+
+    broadcastRoomUpdate(room);
+  });
+
+  // đổi chế độ chơi / bộ từ (chỉ owner)
+  socket.on("updateRoomSettings", (payload = {}) => {
+    const roomId = payload.roomId;
+    const room = getRoomById(roomId);
+    if (!room) return socket.emit("gameError", "Phòng không tồn tại.");
+
+    const me = getPlayerInRoom(room, socket.id);
+    if (!me) return socket.emit("gameError", "Bạn không ở trong phòng.");
+
+    if (me.userId !== room.ownerId) {
+      return socket.emit("gameError", "Bạn không phải chủ phòng.");
+    }
+
+    if (payload.mode) {
+      const m = safeStr(payload.mode);
+      if (m === "normal" || m === "reverse") room.mode = m;
+    }
+
+    if (payload.wordPack) {
+      room.wordPack = sanitizePackName(payload.wordPack);
+    }
+
+    broadcastRoomUpdate(room);
+  });
+
+  // start game (chỉ owner)
+  socket.on("startGame", (payload = {}) => {
+    const roomId = typeof payload === "string" ? payload : payload.roomId;
+    if (!roomId) return socket.emit("gameError", "Thiếu thông tin phòng.");
+
+    const room = getRoomById(roomId);
+    if (!room) return socket.emit("gameError", "Phòng không tồn tại.");
+
+    const me = getPlayerInRoom(room, socket.id);
+    if (!me) return socket.emit("gameError", "Bạn không ở trong phòng.");
+
+    if (me.userId !== room.ownerId) {
+      return socket.emit("gameError", "Bạn không phải chủ phòng.");
+    }
+
+    if (room.players.length < 2) {
+      return socket.emit("gameError", "Cần ít nhất 2 người để bắt đầu.");
+    }
+
+    if (room.state === "playing") return;
+
+    room.state = "playing";
+    room.round = 0;
+
+    // reset score
+    room.players.forEach((p) => (p.score = 0));
+
+    broadcastRoomUpdate(room);
+
+    startMultiplayerRound(room);
+  });
+
+  socket.on("submitAnswer", (payload = {}) => {
+    const roomId = payload.roomId;
+    const answer = safeStr(payload.answer);
+
+    if (!roomId) return;
+    const room = getRoomById(roomId);
+    if (!room) return;
+
+    if (room.state !== "playing") return;
+
+    const me = getPlayerInRoom(room, socket.id);
+    if (!me) return;
+
+    const current = room.currentWord;
+    if (!current) return;
+
+    const correctWord = current.word;
+    const gained = checkAnswerAndScore(room.mode, correctWord, answer);
+
+    if (gained > 0) {
+      me.score = (me.score || 0) + gained;
+
+      io.to(room.id).emit("answerResult", {
+        ok: true,
+        by: { userId: me.userId, username: me.username },
+        gained,
+        correctWord,
+      });
+
+      // sang round mới ngay
+      clearInterval(room.timer);
+      room.timer = null;
+      startMultiplayerRound(room);
+    } else {
+      socket.emit("answerResult", {
+        ok: false,
+        by: { userId: me.userId, username: me.username },
+        gained: 0,
+        correctWord,
+      });
+    }
+
+    broadcastRoomUpdate(room);
+  });
+
+  socket.on("endGame", (payload = {}) => {
+    const roomId = typeof payload === "string" ? payload : payload.roomId;
+    if (!roomId) return;
+
+    const room = getRoomById(roomId);
+    if (!room) return;
+
+    const me = getPlayerInRoom(room, socket.id);
+    if (!me) return;
+
+    if (me.userId !== room.ownerId) {
+      return socket.emit("gameError", "Bạn không phải chủ phòng.");
+    }
+
+    finishMultiplayerGame(room);
+  });
+
+  function startMultiplayerRound(room) {
+    room.round += 1;
+
+    if (room.round > room.maxRounds) {
+      return finishMultiplayerGame(room);
+    }
+
+    const w = getRandomWordFromPack(room.wordPack);
+    if (!w) {
+      return finishMultiplayerGame(room, "Không có từ trong bộ từ.");
+    }
+
+    room.currentWord = w;
+    room.timeLeft = ROUND_TIME;
+
+    io.to(room.id).emit("roundStart", {
+      round: room.round,
+      maxRounds: room.maxRounds,
+      word: w.word,
+      meaning: w.meaning,
+      image: w.image,
+      mode: room.mode,
+      time: room.timeLeft,
+    });
+
+    // timer
+    if (room.timer) clearInterval(room.timer);
+
+    room.timer = setInterval(() => {
+      room.timeLeft -= 1;
+      io.to(room.id).emit("timerUpdate", { time: room.timeLeft });
+
+      if (room.timeLeft <= 0) {
+        clearInterval(room.timer);
+        room.timer = null;
+
+        io.to(room.id).emit("roundTimeout", {
+          round: room.round,
+          correctWord: room.currentWord?.word,
+        });
+
+        // sang round mới
+        startMultiplayerRound(room);
+      }
+    }, 1000);
+
+    broadcastRoomUpdate(room);
+  }
+
+  function finishMultiplayerGame(room, reason) {
+    if (room.timer) clearInterval(room.timer);
+    room.timer = null;
+    room.state = "ended";
+
+    // sort winners
+    const sorted = [...room.players].sort((a, b) => (b.score || 0) - (a.score || 0));
+    const winner = sorted[0];
+
+    io.to(room.id).emit("gameEnded", {
+      roomId: room.id,
+      reason: reason || null,
+      winner: winner ? { userId: winner.userId, username: winner.username, score: winner.score || 0 } : null,
+      leaderboard: sorted.map((p) => ({
+        userId: p.userId,
+        username: p.username,
+        score: p.score || 0,
+      })),
+    });
+
+    // cập nhật total_score cho tất cả
+    sorted.forEach((p) => {
+      if (!p.userId) return;
+      const gained = p.score || 0;
+      if (gained <= 0) return;
+
+      db.query(
+        "UPDATE users SET total_score = total_score + ? WHERE id = ?",
+        [gained, p.userId],
+        (err) => {
+          if (err) console.error("Lỗi cập nhật total_score multi:", err);
+        }
+      );
+    });
+
+    broadcastRoomUpdate(room);
+  }
+
+  function checkAnswerAndScore(mode, correctWord, answer) {
+    if (!answer) return 0;
+    const a = answer.toLowerCase();
+    const c = correctWord.toLowerCase();
+
+    if (mode === "reverse") {
+      // reverse mode: nhập meaning? (tuỳ game), ở đây giữ đơn giản: vẫn check word
+      return a === c ? 10 : 0;
+    }
+    return a === c ? 10 : 0;
+  }
+
+  // Lưu score single-player kiểu local, socket.data.score
+  socket.data.score = socket.data.score || 0;
+
+  // nhận điểm chơi đơn cuối game (client gửi)
+  socket.on("singlePlayerScore", (payload = {}) => {
+    const gainedScore = Number(payload.score) || 0;
+    const game = payload.game || {};
+    const username = payload.username || socket.data.username;
+
+    // update personal score / total score
+    let finalTotalScore = game.score || 0;
+    let finalUserScore = socket.data.score || 0;
+
+    // Single player -> cộng total_score + personal_score
+    if (gainedScore > 0 && socket.data.userId) {
+      db.query(
+        "UPDATE users SET total_score = total_score + ?, personal_score = personal_score + ? WHERE id = ?",
+        [gainedScore, gainedScore, socket.data.userId],
+        (err) => {
+          if (err) console.error("Lỗi cập nhật điểm single:", err);
+        }
+      );
+      socket.data.score = (socket.data.score || 0) + gainedScore;
+      finalUserScore = socket.data.score;
+    }
+
+    socket.emit("singlePlayerScoreSaved", {
+      ok: true,
+      username,
+      totalScore: finalTotalScore,
+      personalScore: finalUserScore,
+    });
+  });
+
+/**************************************************
+ * END MEMBER 1 *
+ **************************************************/
