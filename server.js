@@ -881,3 +881,59 @@ io.on("connection", (socket) => {
 /**************************************************
  * END MEMBER Vu
  **************************************************/
+
+/**************************************************
+ * BEGIN MEMBER 1 - INVITE / PARTY (Multiplayer)
+ * Phạm vi: mời người chơi, xử lý accept/decline, join room...
+ **************************************************/
+
+  // ---------- MỜI NGƯỜI CHƠI ----------
+  socket.on("invitePlayer", (payload = {}) => {
+    const fromUserId = socket.data.userId;
+    const fromUsername = socket.data.username;
+
+    const toUserId = payload.toUserId;
+    const roomId = payload.roomId;
+
+    if (!fromUserId || !toUserId || !roomId) return;
+
+    const targetSocketId = onlineUsers[toUserId];
+    if (!targetSocketId) {
+      return socket.emit("gameError", "Người chơi đang offline.");
+    }
+
+    io.to(targetSocketId).emit("inviteReceived", {
+      fromUserId,
+      fromUsername,
+      roomId,
+    });
+  });
+
+  socket.on("acceptInvite", (payload = {}) => {
+    const roomId = payload.roomId;
+    const room = getRoomById(roomId);
+    if (!room) return socket.emit("gameError", "Phòng không tồn tại.");
+
+    const userId = socket.data.userId;
+    const username = socket.data.username;
+
+    if (!userId) return socket.emit("gameError", "Bạn chưa đăng nhập.");
+
+    if (room.state !== "waiting") {
+      return socket.emit("gameError", "Phòng đang chơi, không thể tham gia.");
+    }
+
+    addPlayerToRoom(room, {
+      userId,
+      username,
+      socketId: socket.id,
+    });
+
+    socket.join(room.id);
+    socket.emit("roomJoined", toPublicRoom(room));
+    broadcastRoomUpdate(room);
+  });
+
+/**************************************************
+ * END MEMBER 1
+ **************************************************/
