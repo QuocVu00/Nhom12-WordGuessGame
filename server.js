@@ -883,7 +883,7 @@ io.on("connection", (socket) => {
  **************************************************/
 
 /**************************************************
- * BEGIN MEMBER 1 - INVITE / PARTY (Multiplayer)
+ * BEGIN MEMBER tung - INVITE / PARTY (Multiplayer)
  * Phạm vi: mời người chơi, xử lý accept/decline, join room...
  **************************************************/
 
@@ -935,5 +935,44 @@ io.on("connection", (socket) => {
   });
 
 /**************************************************
- * END MEMBER 1
+ * END MEMBER tung
  **************************************************/
+
+/**************************************************
+ * COMMON - DISCONNECT / START SERVER
+ **************************************************/
+
+  // ---------- NGẮT KẾT NỐI ----------
+  socket.on("disconnect", () => {
+    console.log("❌ User disconnected:", socket.id);
+
+    // remove online map
+    const uid = socket.data.userId;
+    if (uid && onlineUsers[uid] === socket.id) {
+      delete onlineUsers[uid];
+    }
+
+    // remove from rooms
+    rooms.forEach((room) => {
+      const before = room.players.length;
+      removePlayerFromRoom(room, socket.id);
+
+      if (room.players.length !== before) {
+        setRoomOwnerIfNeeded(room);
+        if (room.players.length === 0) {
+          if (room.timer) clearInterval(room.timer);
+          room.timer = null;
+          removeRoom(room.id);
+        } else {
+          broadcastRoomUpdate(room);
+        }
+      }
+    });
+  });
+});
+
+// ---------- KHỞI ĐỘNG SERVER ----------
+const PORT = 3000;
+server.listen(PORT, () => {
+  console.log(`🚀 Server is running at http://localhost:${PORT}`);
+});
