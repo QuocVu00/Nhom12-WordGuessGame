@@ -160,6 +160,7 @@ button:disabled {
   margin-bottom: 15px;
   min-height: 1.2em;
 }
+
 .lobby-buttons {
   display: flex;
   flex-direction: column;
@@ -209,10 +210,7 @@ button:disabled {
   font-size: 0.9rem;
   min-height: 1.2em;
 }
-/**************************************************
- * thanh van - RANKING / SCOREBOARD UI
- * Phạm vi: score-list, ranking-item, top 1-2-3 highlight...
- **************************************************/
+
 .score-list {
   width: 100%;
   background-color: var(--background-light);
@@ -300,11 +298,8 @@ button:disabled {
 #gameScoreBoard .ranking-item:nth-child(3) .rank-icon {
   color: #cd7f32;
 }
-/**************************************************
- * End van
- **************************************************/
 
- .game-info {
+.game-info {
   font-size: 1.1rem;
   color: var(--gray);
   margin-bottom: 20px;
